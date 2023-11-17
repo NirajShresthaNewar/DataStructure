@@ -1,0 +1,146 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+  int consumer_id;
+  int previous_reading;
+  int current_reading;
+  float amount_due;
+  struct Node *next;
+  struct Node *prev;
+} Node;
+
+Node *head = NULL;
+Node *tail = NULL;
+
+void insert_at_end(int consumer_id, int previous_reading, int current_reading)
+ {
+  Node *new_node = (Node *)malloc(sizeof(Node));
+  new_node->consumer_id = consumer_id;
+  new_node->previous_reading = previous_reading;
+  new_node->current_reading = current_reading;
+  new_node->next = NULL;
+  new_node->prev = NULL;
+
+  if (head == NULL) {
+    head = new_node;
+    tail = new_node;
+  } else {
+    tail->next = new_node;
+    new_node->prev = tail;
+    tail = new_node;
+  }
+}
+
+void display_bill(int consumer_id) {
+  Node *current_node = head;
+  float amount_due;
+  while (current_node != NULL) {
+    if (current_node->consumer_id == consumer_id)
+	 {
+      int consumption = current_node->current_reading - current_node->previous_reading;
+     if(consumption<=1000){
+		amount_due = consumption *150 ;//150 per cubic feet
+	 }
+	  else if(consumption>1000&&consumption<2000){
+		 amount_due = consumption *155 ;//155 per cubic feet
+	 }
+	else if(consumption>=2000&&consumption<3000){
+		 amount_due = consumption *160 ;//160 per cubic feet
+	 }
+	else//above 3000 
+	{
+		amount_due = consumption *165 ;//160 per cubic feet
+	 }
+	  
+
+      printf("Consumer ID: %d\n", current_node->consumer_id);
+      printf("Previous Reading: %d Cubic Foot\n", current_node->previous_reading);
+      printf("Current Reading: %d Cubic Foot\n", current_node->current_reading);
+      printf("Consumption: %dCubic Foot\n", consumption);
+    printf("Amount Due:RS.%.2f\n", amount_due);
+
+      break;
+    }
+
+    current_node = current_node->next;
+  }
+}
+
+void delete_node(int consumer_id) {
+  Node *current_node = head;
+  while (current_node != NULL) {
+    if (current_node->consumer_id == consumer_id) {
+      if (current_node == head) {
+        head = current_node->next;
+        if (head != NULL) {
+          head->prev = NULL;
+        }
+      } else if (current_node == tail) {
+        tail = current_node->prev;
+        if (tail != NULL) {
+          tail->next = NULL;
+        }
+      } else {
+        current_node->prev->next = current_node->next;
+        current_node->next->prev = current_node->prev;
+      }
+
+      free(current_node);
+      break;
+    }
+
+    current_node = current_node->next;
+  }
+}
+
+int main() {
+  int choice;
+
+  while (1) {
+    printf("1. Insert Consumer Data\n");
+    printf("2. Display Bill\n");
+    printf("3. Delete Consumer Data\n");
+    printf("4. Exit\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+      case 1:
+        int consumer_id, previous_reading, current_reading;
+        printf("Enter Consumer ID: ");
+        scanf("%d", &consumer_id);
+        printf("Enter Previous Reading: ");
+        scanf("%d", &previous_reading);
+        printf("Enter Current Reading: ");
+        scanf("%d", &current_reading);
+
+        insert_at_end(consumer_id, previous_reading, current_reading);
+        break;
+
+      case 2:
+        int display_id;
+        printf("Enter Consumer ID to display bill: ");
+        scanf("%d", &display_id);
+
+        display_bill(display_id);
+        break;
+
+      case 3:
+        int delete_id;
+        printf("Enter Consumer ID to delete: ");
+        scanf("%d", &delete_id);
+
+        delete_node(delete_id);
+        break;
+
+      case 4:
+        exit(0);
+
+      default:
+        printf("Invalid choice. Please enter a valid option.\n");
+    }
+  }
+
+  return 0;
+}
